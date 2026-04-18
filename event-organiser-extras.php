@@ -295,6 +295,172 @@ function eo_extras_get_event_date_text( $event_id, $time_enabled = false, $timez
 	return esc_html( $output );
 }
 
+/**
+ * Returns a short "coming up" message for the event.
+ *
+ * For recurring events this uses the next occurrence. For non-recurring events
+ * it uses the scheduled start date. Past or already-started events return an
+ * empty string because "coming up" would no longer be accurate.
+ *
+ * @param int $event_id Event post ID.
+ * @return string
+ */
+function eo_extras_get_event_countdown_text( $event_id ) {
+	$event_id = (int) $event_id;
+
+	if ( ! $event_id ) {
+		return '';
+	}
+
+	if ( eo_recurs( $event_id ) ) {
+		$next_occurrence = eo_get_next_occurrence_of( $event_id );
+
+		if ( empty( $next_occurrence['start'] ) || ! ( $next_occurrence['start'] instanceof DateTime ) ) {
+			return '';
+		}
+
+		$target = clone $next_occurrence['start'];
+	} else {
+		$schedule = eo_get_event_schedule( $event_id );
+		if ( empty( $schedule['start'] ) || ! ( $schedule['start'] instanceof DateTime ) ) {
+			return '';
+		}
+
+		$target = clone $schedule['start'];
+	}
+
+	$today = new DateTime( 'now', eo_get_blog_timezone() );
+	$today->setTime( 0, 0, 0 );
+	$target->setTime( 0, 0, 0 );
+
+	$day_diff = (int) $today->diff( $target )->format( '%r%a' );
+
+	if ( $day_diff < 0 ) {
+		return '';
+	}
+
+	if ( 0 === $day_diff ) {
+		return esc_html__( 'Coming up today', 'event-organiser-extras' );
+	}
+
+	if ( 1 === $day_diff ) {
+		return esc_html__( 'Coming up tomorrow', 'event-organiser-extras' );
+	}
+
+	return sprintf(
+		/* translators: %d: number of days until the event. */
+		esc_html__( 'Coming up in %d days', 'event-organiser-extras' ),
+		$day_diff
+	);
+}
+
+/**
+ * Returns register link markup for an event.
+ *
+ * Single events defer to the existing CiviCRM Event Organiser shortcode.
+ * Recurring events are reduced to one CTA for the next active occurrence.
+ *
+ * @param int   $event_id Event post ID.
+ * @param array $args Optional arguments.
+ * @return string
+ */
+function eo_extras_get_event_register_link_markup( $event_id, $args = array() ) {
+	$event_id = (int) $event_id;
+
+	if ( ! $event_id ) {
+		return '';
+	}
+
+	$args = wp_parse_args(
+		$args,
+		array(
+			'messages'     => 'no',
+			'wrap'         => 'div',
+			'anchor_class' => '',
+			'paid_event'   => function_exists( 'get_field' ) ? get_field( 'paid_event', $event_id ) : false,
+		)
+	);
+
+	$title = ! empty( $args['paid_event'] ) ? 'Register' : 'RSVP';
+
+	if ( ! eo_recurs( $event_id ) ) {
+		$shortcode = sprintf(
+			'[ceo_register_link event_id="%1$d" messages="%2$s" wrap="%3$s" title="%4$s" anchor_class="%5$s"]',
+			$event_id,
+			esc_attr( $args['messages'] ),
+			esc_attr( $args['wrap'] ),
+			esc_attr( $title ),
+			esc_attr( $args['anchor_class'] )
+		);
+
+		return do_shortcode( $shortcode );
+	}
+
+	if ( ! function_exists( 'civicrm_event_organiser_get_register_links' ) || ! function_exists( 'civicrm_eo' ) ) {
+		return '';
+	}
+
+	$links_data = civicrm_event_organiser_get_register_links( $event_id );
+	$next_link  = '';
+	$next_time  = null;
+
+	foreach ( $links_data as $civi_event_id => $link_data ) {
+		if ( empty( $link_data['link'] ) || empty( $link_data['meta'] ) || ! in_array( 'active', $link_data['meta'], true ) ) {
+			continue;
+		}
+
+		$occurrence_id = civicrm_eo()->mapping->get_eo_occurrence_id_by_civi_event_id( (int) $civi_event_id );
+		if ( empty( $occurrence_id ) ) {
+			continue;
+		}
+
+		$occurrence_ts = eo_get_the_start( 'U', $event_id, $occurrence_id );
+		if ( empty( $occurrence_ts ) ) {
+			continue;
+		}
+
+		if ( null === $next_time || (int) $occurrence_ts < $next_time ) {
+			$date_label = eo_get_the_start( 'F j, Y', $event_id, $occurrence_id );
+			$link_text  = sprintf( '%1$s for %2$s', $title, $date_label );
+			$href       = '';
+			$classes    = 'civicrm-event-organiser-register-link';
+
+			if ( preg_match( '/href=(["\'])(.*?)\1/', $link_data['link'], $href_match ) ) {
+				$href = $href_match[2];
+			}
+
+			if ( preg_match( '/class=(["\'])(.*?)\1/', $link_data['link'], $class_match ) ) {
+				$classes = $class_match[2];
+			}
+
+			if ( ! empty( $args['anchor_class'] ) ) {
+				$classes = trim( $classes . ' ' . $args['anchor_class'] );
+			}
+
+			if ( ! empty( $href ) ) {
+				$next_link = sprintf(
+					'<a class="%1$s" href="%2$s">%3$s</a>',
+					esc_attr( $classes ),
+					esc_url( $href ),
+					esc_html( $link_text )
+				);
+			}
+
+			$next_time = (int) $occurrence_ts;
+		}
+	}
+
+	if ( empty( $next_link ) ) {
+		return '';
+	}
+
+	if ( 'div' === $args['wrap'] ) {
+		return '<div>' . $next_link . '</div>';
+	}
+
+	return $next_link;
+}
+
 // Create the [event_times] shortcode.
 function eo_extras_event_times_shortcode( $atts = array() ) {
 	$atts = shortcode_atts(
