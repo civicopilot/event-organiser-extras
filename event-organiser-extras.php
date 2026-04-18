@@ -117,15 +117,26 @@ function eo_extras_shortcode_attribute_is_enabled( $value ) {
 	return 'true' === strtolower( (string) $value );
 }
 
-// Create the [event_occurrence] shortcode.
-function eo_extras_event_occurrence_shortcode( $atts = array() ) {
+/**
+ * Returns a short recurrence occurrence summary such as "5 Tuesdays".
+ *
+ * @param int $event_id Event post ID.
+ * @return string
+ */
+function eo_extras_get_event_occurrence_text( $event_id ) {
+	$event_id = (int) $event_id;
+
+	if ( ! $event_id ) {
+		return '';
+	}
+
 	// Only recurring events have an occurrence count / weekday summary.
-	if ( ! eo_recurs() ) {
+	if ( ! eo_recurs( $event_id ) ) {
 		return '';
 	}
 
 	// Get all occurrences so we can count how many times the event runs.
-	$occurrences  = eo_get_the_occurrences_of( get_the_ID() );
+	$occurrences  = eo_get_the_occurrences_of( $event_id );
 	$total_events = is_array( $occurrences ) ? count( $occurrences ) : 0;
 
 	if ( $total_events < 1 ) {
@@ -133,29 +144,156 @@ function eo_extras_event_occurrence_shortcode( $atts = array() ) {
 	}
 
 	// Use the first scheduled date to determine the weekday label.
-	$first_date  = eo_get_schedule_start( 'Y-m-d' );
+	$first_date  = eo_get_schedule_start( 'Y-m-d', $event_id );
 	$day_of_week = date_i18n( 'l', strtotime( $first_date ) );
 
 	return esc_html( $total_events . ' ' . $day_of_week . ( $total_events > 1 ? 's' : '' ) );
 }
+
+// Create the [event_occurrence] shortcode.
+function eo_extras_event_occurrence_shortcode( $atts = array() ) {
+	unset( $atts );
+
+	return eo_extras_get_event_occurrence_text( eo_extras_get_current_event_id() );
+}
 add_shortcode( 'event_occurrence', 'eo_extras_event_occurrence_shortcode' );
 
-// Create the [event_recurrence] shortcode.
-function eo_extras_event_recurrence_shortcode( $atts = array() ) {
+/**
+ * Returns the recurrence summary such as "every month on the first Saturday".
+ *
+ * @param int $event_id Event post ID.
+ * @return string
+ */
+function eo_extras_get_event_recurrence_text( $event_id ) {
+	$event_id = (int) $event_id;
+
+	if ( ! $event_id ) {
+		return '';
+	}
+
 	// A recurrence summary only applies to recurring events.
-	if ( ! eo_recurs() ) {
+	if ( ! eo_recurs( $event_id ) ) {
 		return '';
 	}
 
 	// Use Event Organiser's built-in recurrence summary helper.
-	$summary = eo_get_schedule_summary( get_the_ID() );
+	$summary = eo_get_schedule_summary( $event_id );
 
 	// Drop the trailing "until ..." portion for a shorter recurrence label.
 	$summary = preg_replace( '/\s+until\s+.+$/i', '', $summary );
 
 	return esc_html( $summary );
 }
+
+// Create the [event_recurrence] shortcode.
+function eo_extras_event_recurrence_shortcode( $atts = array() ) {
+	unset( $atts );
+
+	return eo_extras_get_event_recurrence_text( eo_extras_get_current_event_id() );
+}
 add_shortcode( 'event_recurrence', 'eo_extras_event_recurrence_shortcode' );
+
+/**
+ * Returns a formatted event time range for the current event context.
+ *
+ * Uses schedule data instead of occurrence-dependent helpers so the output is
+ * reliable inside sidebars, widgets, and shortcode rendering outside the loop.
+ *
+ * @param int  $event_id          Event post ID.
+ * @param bool $timezone_enabled  Whether to append timezone abbreviation.
+ * @return string
+ */
+function eo_extras_get_event_time_range( $event_id, $timezone_enabled = true ) {
+	$event_id = (int) $event_id;
+
+	if ( ! $event_id ) {
+		return '';
+	}
+
+	if ( eo_is_all_day( $event_id ) ) {
+		return esc_html__( 'All day', 'eventorganiser' );
+	}
+
+	$schedule = eo_get_event_schedule( $event_id );
+
+	if ( empty( $schedule['start'] ) || empty( $schedule['end'] ) ) {
+		return '';
+	}
+
+	$start_time = $schedule['start']->format( 'g:i a' );
+	$end_time   = $schedule['end']->format( 'g:i a' );
+
+	if ( empty( $start_time ) && empty( $end_time ) ) {
+		return '';
+	}
+
+	$time_output = $start_time;
+
+	if ( ! empty( $end_time ) && $end_time !== $start_time ) {
+		$time_output .= ' – ' . $end_time;
+	}
+
+	if ( $timezone_enabled ) {
+		$timezone_abbr = eo_extras_shortcode_timezone_abbreviation();
+		if ( $timezone_abbr ) {
+			$time_output .= ' ' . $timezone_abbr;
+		}
+	}
+
+	return esc_html( trim( $time_output ) );
+}
+
+/**
+ * Returns a formatted event date string for the given event.
+ *
+ * @param int  $event_id            Event post ID.
+ * @param bool $time_enabled        Whether to append the time range.
+ * @param bool $timezone_enabled    Whether to include timezone abbreviation.
+ * @param bool $occurrence_enabled  Whether to prepend occurrence summary.
+ * @return string
+ */
+function eo_extras_get_event_date_text( $event_id, $time_enabled = false, $timezone_enabled = false, $occurrence_enabled = false ) {
+	$event_id = (int) $event_id;
+
+	if ( ! $event_id ) {
+		return '';
+	}
+
+	if ( ! eo_recurs( $event_id ) ) {
+		$output = eo_get_schedule_start( 'F j, Y', $event_id );
+
+		if ( $time_enabled ) {
+			$time_output = eo_extras_get_event_time_range( $event_id, $timezone_enabled );
+			if ( '' !== $time_output ) {
+				$output .= ' @ ' . $time_output;
+			}
+		}
+
+		return $output;
+	}
+
+	$start_year = eo_get_schedule_start( 'Y', $event_id );
+	$end_year   = eo_get_schedule_last( 'Y', $event_id );
+	$start_date = ( $start_year === $end_year ) ? eo_get_schedule_start( 'F j', $event_id ) : eo_get_schedule_start( 'F j, Y', $event_id );
+	$end_date   = eo_get_schedule_last( 'F j, Y', $event_id );
+	$output     = $start_date . ' – ' . $end_date;
+
+	if ( $occurrence_enabled ) {
+		$occurrence = eo_extras_get_event_occurrence_text( $event_id );
+		if ( '' !== $occurrence ) {
+			$output = $occurrence . ' | ' . $output;
+		}
+	}
+
+	if ( $time_enabled ) {
+		$time_output = eo_extras_get_event_time_range( $event_id, $timezone_enabled );
+		if ( '' !== $time_output ) {
+			$output .= ' @ ' . $time_output;
+		}
+	}
+
+	return esc_html( $output );
+}
 
 // Create the [event_times] shortcode.
 function eo_extras_event_times_shortcode( $atts = array() ) {
@@ -167,21 +305,15 @@ function eo_extras_event_times_shortcode( $atts = array() ) {
 		'event_times'
 	);
 
-	$timezone_enabled = eo_extras_shortcode_attribute_is_enabled( $atts['timezone'] );
-	$timezone_abbr    = $timezone_enabled ? eo_extras_shortcode_timezone_abbreviation() : '';
-	$timezone_suffix  = $timezone_abbr ? ' ' . $timezone_abbr : '';
+	$event_id = eo_extras_get_current_event_id();
 
-	if ( ! eo_recurs() ) {
-		// Single event: use the event's actual start and end times.
-		$start_time = eo_get_the_start( 'g:i a' );
-		$end_time   = eo_get_the_end( 'g:i a' );
-	} else {
-		// Recurring event: use the schedule start plus the event end time.
-		$start_time = eo_get_schedule_start( 'g:i a' );
-		$end_time   = eo_get_the_end( 'g:i a' );
+	if ( ! $event_id ) {
+		return '';
 	}
 
-	return esc_html( $start_time . ' – ' . $end_time . $timezone_suffix );
+	$timezone_enabled = eo_extras_shortcode_attribute_is_enabled( $atts['timezone'] );
+
+	return eo_extras_get_event_time_range( $event_id, $timezone_enabled );
 }
 add_shortcode( 'event_times', 'eo_extras_event_times_shortcode' );
 
@@ -201,47 +333,110 @@ function eo_extras_event_date_shortcode( $atts = array() ) {
 	$time_enabled       = eo_extras_shortcode_attribute_is_enabled( $atts['time'] );
 	$timezone_enabled   = eo_extras_shortcode_attribute_is_enabled( $atts['timezone'] );
 	$occurrence_enabled = eo_extras_shortcode_attribute_is_enabled( $atts['occurrence'] );
+	$event_id           = eo_extras_get_current_event_id();
 
-	if ( ! eo_recurs() ) {
-		// Single (non-recurring) event.
-		$output = eo_get_schedule_start( 'F j, Y' );
-
-		// Optionally append the time range.
-		if ( $time_enabled ) {
-			$output .= ' @ ' . eo_extras_event_times_shortcode(
-				array(
-					'timezone' => $timezone_enabled ? 'true' : 'false',
-				)
-			);
-		}
-
-		return '<div class="eo-event-meta eo-event-meta-single">' . esc_html( $output ) . '</div>';
+	if ( ! $event_id ) {
+		return '';
 	}
 
-	// Recurring event: build the date range first.
-	$start_year = eo_get_schedule_start( 'Y' );
-	$end_year   = eo_get_schedule_last( 'Y' );
-	$start_date = ( $start_year === $end_year ) ? eo_get_schedule_start( 'F j' ) : eo_get_schedule_start( 'F j, Y' );
-	$end_date   = eo_get_schedule_last( 'F j, Y' );
-	$output     = $start_date . ' – ' . $end_date;
+	$output = eo_extras_get_event_date_text( $event_id, $time_enabled, $timezone_enabled, $occurrence_enabled );
 
-	// Optionally prepend the occurrence summary such as "5 Tuesdays".
-	if ( $occurrence_enabled ) {
-		$occurrence = eo_extras_event_occurrence_shortcode();
-		if ( ! empty( $occurrence ) ) {
-			$output = $occurrence . ' | ' . $output;
-		}
-	}
-
-	// Optionally append the time range.
-	if ( $time_enabled ) {
-		$output .= ' @ ' . eo_extras_event_times_shortcode(
-			array(
-				'timezone' => $timezone_enabled ? 'true' : 'false',
-			)
-		);
-	}
-
-	return '<div class="eo-event-meta eo-event-meta-recurring">' . esc_html( $output ) . '</div>';
+	return '<div class="eo-event-meta ' . esc_attr( eo_recurs( $event_id ) ? 'eo-event-meta-recurring' : 'eo-event-meta-single' ) . '">' . $output . '</div>';
 }
 add_shortcode( 'event_date', 'eo_extras_event_date_shortcode' );
+
+/**
+ * Returns the current event ID for event-related shortcodes.
+ *
+ * This prefers the queried object so widgets/sidebars still resolve the
+ * current single event even when the global loop context is thin.
+ *
+ * @return int
+ */
+function eo_extras_get_current_event_id() {
+	$event_id = 0;
+
+	if ( is_singular( 'event' ) ) {
+		$event_id = (int) get_queried_object_id();
+	}
+
+	if ( ! $event_id ) {
+		$event_id = (int) get_the_ID();
+	}
+
+	if ( $event_id && 'event' !== get_post_type( $event_id ) ) {
+		return 0;
+	}
+
+	return $event_id;
+}
+
+/**
+ * Locates the sidebar template, preferring child-theme overrides.
+ *
+ * @return string
+ */
+function eo_extras_get_event_sidebar_template_path() {
+	$template_names = array(
+		'event-meta-event-single-sidebar.php',
+		'event-organiser-extras/event-meta-event-single-sidebar.php',
+	);
+
+	$template = locate_template( $template_names, false, false );
+
+	if ( ! empty( $template ) ) {
+		return $template;
+	}
+
+	return plugin_dir_path( __FILE__ ) . 'templates/event-meta-event-single-sidebar.php';
+}
+
+/**
+ * Create the [eo_extras_sidebar_meta] shortcode.
+ *
+ * Loads a default sidebar meta template from the plugin, but allows a child
+ * theme override so client-specific sidebar presentation can live in the theme.
+ *
+ * @param array $atts Shortcode attributes.
+ * @return string
+ */
+function eo_extras_event_sidebar_meta_shortcode( $atts = array() ) {
+	unset( $atts );
+
+	$event_id = eo_extras_get_current_event_id();
+
+	if ( ! $event_id ) {
+		return '';
+	}
+
+	$template_path = eo_extras_get_event_sidebar_template_path();
+
+	if ( ! file_exists( $template_path ) ) {
+		return '';
+	}
+
+	$event_post = get_post( $event_id );
+
+	if ( ! $event_post instanceof WP_Post ) {
+		return '';
+	}
+
+	$previous_post = $GLOBALS['post'] ?? null;
+	$GLOBALS['post'] = $event_post;
+	setup_postdata( $event_post );
+
+	ob_start();
+	include $template_path;
+	$output = ob_get_clean();
+
+	if ( $previous_post instanceof WP_Post ) {
+		$GLOBALS['post'] = $previous_post;
+		setup_postdata( $previous_post );
+	} else {
+		unset( $GLOBALS['post'] );
+		wp_reset_postdata();
+	}
+
+	return $output;
+}
+add_shortcode( 'eo_extras_sidebar_meta', 'eo_extras_event_sidebar_meta_shortcode' );
