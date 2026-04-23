@@ -2,8 +2,7 @@
 /**
  * Default sidebar meta template for the [eo_extras_sidebar_meta] shortcode.
  *
- * Child themes can override this by creating either:
- * - event-meta-event-single-sidebar.php
+ * Child themes can override this by creating:
  * - event-organiser-extras/event-meta-event-single-sidebar.php
  *
  * @package Event_Organiser_Extras
@@ -12,54 +11,145 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+$venue_id              = eo_get_venue();
+$venue_name            = $venue_id ? eo_get_venue_name( $venue_id ) : '';
+$address_details       = $venue_id ? array_filter( eo_get_venue_address( $venue_id ) ) : array();
+$location_parts        = array();
+$event_id              = get_the_ID();
+$is_recurring          = eo_recurs( $event_id );
+$recurrence_text       = eo_extras_get_event_recurrence_text( $event_id );
+$next_occurrence       = $is_recurring ? eo_get_next_occurrence_of( $event_id ) : false;
+$has_future_occurrence = ! empty( $next_occurrence );
+$countdown_text        = eo_extras_get_event_countdown_text( $event_id );
+
+if ( $is_recurring && $has_future_occurrence ) {
+	$occurrence_id = ! empty( $next_occurrence['occurrence_id'] ) ? (int) $next_occurrence['occurrence_id'] : 0;
+	$date_value    = $occurrence_id ? eo_get_the_start( 'l, F j, Y', $event_id, $occurrence_id ) : '';
+
+	if ( $occurrence_id && eo_is_all_day( $event_id ) ) {
+		$time_value = esc_html__( 'All day', 'eventorganiser' );
+	} elseif ( $occurrence_id ) {
+		$time_value = sprintf(
+			'%1$s - %2$s %3$s',
+			eo_get_the_start( 'g:i A', $event_id, $occurrence_id ),
+			eo_get_the_end( 'g:i A', $event_id, $occurrence_id ),
+			eo_extras_shortcode_timezone_abbreviation()
+		);
+	} else {
+		$time_value = '';
+	}
+} else {
+	$occurrences          = eo_get_the_occurrences_of( $event_id );
+	$occurrence_ids       = is_array( $occurrences ) ? array_keys( $occurrences ) : array();
+	$single_occurrence_id = ! empty( $occurrence_ids ) ? (int) $occurrence_ids[0] : 0;
+	$date_value           = $single_occurrence_id ? eo_get_the_start( 'l, F j, Y', $event_id, $single_occurrence_id ) : eo_get_schedule_start( 'l, F j, Y', $event_id );
+
+	$time_value = eo_is_all_day( $event_id )
+		? esc_html__( 'All day', 'eventorganiser' )
+		: sprintf(
+			'%1$s - %2$s %3$s',
+			$single_occurrence_id ? eo_get_the_start( 'g:i A', $event_id, $single_occurrence_id ) : eo_get_schedule_start( 'g:i A', $event_id ),
+			$single_occurrence_id ? eo_get_the_end( 'g:i A', $event_id, $single_occurrence_id ) : '',
+			eo_extras_shortcode_timezone_abbreviation()
+		);
+}
+
+if ( ! empty( $address_details['address'] ) ) {
+	$location_parts[] = $address_details['address'];
+}
+
+$city_state_postcode = '';
+
+if ( ! empty( $address_details['city'] ) ) {
+	$city_state_postcode .= rtrim( $address_details['city'], ',' );
+}
+
+if ( ! empty( $address_details['state'] ) ) {
+	$city_state_postcode .= $city_state_postcode ? ', ' : '';
+	$city_state_postcode .= $address_details['state'];
+}
+
+if ( ! empty( $address_details['postcode'] ) ) {
+	$city_state_postcode .= $city_state_postcode ? ' ' : '';
+	$city_state_postcode .= $address_details['postcode'];
+}
+
+if ( '' !== $city_state_postcode ) {
+	$location_parts[] = $city_state_postcode;
+}
+
+$google_maps_address = implode(
+	', ',
+	array_filter(
+		array(
+			$address_details['address'] ?? '',
+			$address_details['city'] ?? '',
+			trim(
+				implode(
+					' ',
+					array_filter(
+						array(
+							$address_details['state'] ?? '',
+							$address_details['postcode'] ?? '',
+						)
+					)
+				)
+			),
+			'United States',
+		)
+	)
+);
+
+$google_maps_url = $google_maps_address
+	? 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode( $google_maps_address )
+	: '';
 ?>
 
-<div class="eventorganiser-event-meta eventorganiser-event-meta-sidebar">
-	<h4><?php esc_html_e( 'Event Details', 'eventorganiser' ); ?></h4>
+<aside class="eo-event-meta eo-extras-sidebar-meta has-top-border">
+	<h4><?php esc_html_e( 'Event Details', 'event-organiser-extras' ); ?></h4>
 
-	<div class="eo-event-meta">
-		<?php if ( eo_recurs() ) : ?>
-			<?php echo wp_kses_post( eo_extras_event_date_shortcode( array(
-				'time'       => 'true',
-				'timezone'   => 'true',
-				'occurrence' => 'true',
-			) ) ); ?>
-			<div>
-				<strong><?php esc_html_e( 'Recurrence', 'eventorganiser' ); ?>:</strong>
-				<?php echo esc_html( eo_extras_get_event_recurrence_text( get_the_ID() ) ); ?>
-			</div>
-		<?php else : ?>
-			<?php echo wp_kses_post( eo_extras_event_date_shortcode( array(
-				'time'     => 'true',
-				'timezone' => 'true',
-			) ) ); ?>
-		<?php endif; ?>
-
-		<?php if ( eo_get_venue() ) : ?>
-			<?php $address = array_filter( eo_get_venue_address() ); ?>
-			<div>
-				<strong><?php esc_html_e( 'Venue', 'eventorganiser' ); ?>:</strong>
-				<?php eo_venue_name(); ?>
-				<?php if ( ! empty( $address ) ) : ?>
-					(<?php echo esc_html( implode( ', ', $address ) ); ?>)
+	<div class="eo-event-meta__list">
+		<div class="eo-event-meta__item">
+			<div class="eo-event-meta__label eo-label"><?php esc_html_e( 'When', 'event-organiser-extras' ); ?></div>
+			<div class="eo-event-meta__value">
+				<div class="eo-event-meta__date"><?php echo esc_html( $date_value ); ?></div>
+				<?php if ( '' !== $time_value ) : ?>
+					<div class="eo-event-meta__time"><?php echo esc_html( $time_value ); ?></div>
+				<?php endif; ?>
+				<?php if ( $has_future_occurrence && '' !== $recurrence_text ) : ?>
+					<div class="eo-event-meta__recurrence meta-sub"><?php echo esc_html( ucfirst( $recurrence_text ) ); ?></div>
+				<?php elseif ( ! $is_recurring && '' !== $countdown_text ) : ?>
+					<div class="eo-event-meta__countdown meta-sub"><?php echo esc_html( $countdown_text ); ?></div>
 				<?php endif; ?>
 			</div>
-		<?php endif; ?>
+		</div>
 
-		<?php $categories = get_the_terms( get_the_ID(), 'event-category' ); ?>
-		<?php if ( $categories && ! is_wp_error( $categories ) ) : ?>
-			<div>
-				<strong><?php esc_html_e( 'Category', 'eventorganiser' ); ?>:</strong>
-				<?php echo wp_kses_post( get_the_term_list( get_the_ID(), 'event-category', '', ', ', '' ) ); ?>
-			</div>
-		<?php endif; ?>
-
-		<?php $tags = get_the_terms( get_the_ID(), 'event-tag' ); ?>
-		<?php if ( $tags && ! is_wp_error( $tags ) ) : ?>
-			<div>
-				<strong><?php esc_html_e( 'Tags', 'eventorganiser' ); ?>:</strong>
-				<?php echo wp_kses_post( get_the_term_list( get_the_ID(), 'event-tag', '', ', ', '' ) ); ?>
+		<?php if ( $venue_id ) : ?>
+			<div class="eo-event-meta__item">
+				<div class="eo-event-meta__label eo-label"><?php esc_html_e( 'Where', 'event-organiser-extras' ); ?></div>
+				<div class="eo-event-meta__value">
+					<?php if ( $venue_name ) : ?>
+						<div class="eo-event-meta__venue"><?php echo esc_html( $venue_name ); ?></div>
+					<?php endif; ?>
+					<?php foreach ( $location_parts as $location_part ) : ?>
+						<div><?php echo esc_html( $location_part ); ?></div>
+					<?php endforeach; ?>
+					<?php if ( $google_maps_url ) : ?>
+						<div class="eo-event-meta__map-link meta-sub">
+							<a href="<?php echo esc_url( $google_maps_url ); ?>" target="_blank" rel="noopener noreferrer">
+								<?php esc_html_e( 'Google Maps & Directions', 'event-organiser-extras' ); ?>
+							</a>
+						</div>
+					<?php endif; ?>
+				</div>
 			</div>
 		<?php endif; ?>
 	</div>
-</div>
+
+	<div class="civicrm-register-link">
+		<?php
+		echo wp_kses_post( eo_extras_get_event_register_link_markup( $event_id ) );
+		?>
+	</div>
+</aside>
