@@ -1,6 +1,6 @@
 # Event Organiser Extras
 
-Custom WordPress shortcodes for the [Event Organiser](https://wordpress.org/plugins/event-organiser/) plugin, intended for reusable event displays in builders such as FacetWP and Elementor and to lesser extent PHP templates if you must.
+WordPress shortcodes for the Event Organiser plugin, intended for reusable event displays in query builders and to lesser extent PHP templates if you must.
 
 ## Shortcodes
 
@@ -12,6 +12,7 @@ This plugin registers the following shortcodes:
 - `[event_date time="true"]` -> `April 8 - May 6, 2025 @ 7:00 pm – 8:30 pm`
 - `[event_date time="true" timezone="true" occurrence="true"]` -> `5 Tuesdays | April 8 - May 6, 2025 @ 7:00 pm – 8:30 pm EDT`
 - `[event_times]` -> `7:00 pm – 8:30 pm EDT`
+- `[eo_extras_sidebar_meta]` -> event details sidebar markup with theme override support
 
 Supported attributes:
 
@@ -19,11 +20,16 @@ Supported attributes:
 - `[event_times]` supports `timezone`
 - These are boolean shortcode attributes passed as string values, for example `time="true"` or `timezone="false"`
 
+They must be used in the context of an Event Organiser event
+
 ## Requirements
 
 - WordPress
-- [Event Organiser](https://github.com/stephenharris/Event-Organiser)
+- [WPCV Event Organiser](https://develop.tadpole.cc/plugins/wpcv-event-organiser)
+- [CiviCRM Event Organiser](https://github.com/christianwach/civicrm-event-organiser) integration for registration link output
 
-## Usage
+## Event Meta Sidebar Template
 
-These shortcodes should be used in the context of an Event Organiser event post.
+This plugin provides a sidebar template shortcode, but it requires assembly and preferred way is to add into your child theme and customize it further.
+
+To override the sidebar template in a child theme, copy the template from this plugin and create `event-organiser-extras/event-meta-event-single-sidebar.php`
