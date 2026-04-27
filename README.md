@@ -30,6 +30,6 @@ They must be used in the context of an Event Organiser event
 
 ## Event Meta Sidebar Template
 
-This plugin provides a sidebar template shortcode, but it requires assembly and preferred way is to add into your child theme and customize it further.
+This plugin includes a default sidebar template for the `[eo_extras_sidebar_meta]` shortcode. If you need custom markup, copy it into your theme at `event-organiser-extras/event-meta-event-single-sidebar.php` and customize it there.
 
-To override the sidebar template in a child theme, copy the template from this plugin and create `event-organiser-extras/event-meta-event-single-sidebar.php`
+When the template is overridden in the theme, the plugin does not enqueue its default sidebar stylesheet. In that case, the theme is expected to provide CSS in `style.css`. You can copy the styles from `assets/css/event-organiser-extras.css` to get started.
