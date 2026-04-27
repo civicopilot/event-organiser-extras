@@ -106,37 +106,37 @@ $google_maps_url = $google_maps_address
 	: '';
 ?>
 
-<aside class="eo-event-meta eo-extras-sidebar-meta has-top-border">
+<aside class="eo-event-meta eo-extras-sidebar-meta">
 	<h4><?php esc_html_e( 'Event Details', 'event-organiser-extras' ); ?></h4>
 
 	<div class="eo-event-meta__list">
 		<div class="eo-event-meta__item">
-			<div class="eo-event-meta__label eo-label"><?php esc_html_e( 'When', 'event-organiser-extras' ); ?></div>
+			<div class="eo-event-meta__label"><?php esc_html_e( 'When', 'event-organiser-extras' ); ?></div>
 			<div class="eo-event-meta__value">
 				<div class="eo-event-meta__date"><?php echo esc_html( $date_value ); ?></div>
 				<?php if ( '' !== $time_value ) : ?>
 					<div class="eo-event-meta__time"><?php echo esc_html( $time_value ); ?></div>
 				<?php endif; ?>
 				<?php if ( $has_future_occurrence && '' !== $recurrence_text ) : ?>
-					<div class="eo-event-meta__recurrence meta-sub"><?php echo esc_html( ucfirst( $recurrence_text ) ); ?></div>
+					<div class="eo-event-meta__recurrence"><?php echo esc_html( ucfirst( $recurrence_text ) ); ?></div>
 				<?php elseif ( ! $is_recurring && '' !== $countdown_text ) : ?>
-					<div class="eo-event-meta__countdown meta-sub"><?php echo esc_html( $countdown_text ); ?></div>
+					<div class="eo-event-meta__countdown"><?php echo esc_html( $countdown_text ); ?></div>
 				<?php endif; ?>
 			</div>
 		</div>
 
 		<?php if ( $venue_id ) : ?>
 			<div class="eo-event-meta__item">
-				<div class="eo-event-meta__label eo-label"><?php esc_html_e( 'Where', 'event-organiser-extras' ); ?></div>
+				<div class="eo-event-meta__label"><?php esc_html_e( 'Where', 'event-organiser-extras' ); ?></div>
 				<div class="eo-event-meta__value">
 					<?php if ( $venue_name ) : ?>
 						<div class="eo-event-meta__venue"><?php echo esc_html( $venue_name ); ?></div>
 					<?php endif; ?>
-					<?php foreach ( $location_parts as $location_part ) : ?>
-						<div><?php echo esc_html( $location_part ); ?></div>
-					<?php endforeach; ?>
+						<?php foreach ( $location_parts as $location_part ) : ?>
+							<div class="eo-event-meta__address-line"><?php echo esc_html( $location_part ); ?></div>
+						<?php endforeach; ?>
 					<?php if ( $google_maps_url ) : ?>
-						<div class="eo-event-meta__map-link meta-sub">
+						<div class="eo-event-meta__map-link">
 							<a href="<?php echo esc_url( $google_maps_url ); ?>" target="_blank" rel="noopener noreferrer">
 								<?php esc_html_e( 'Google Maps & Directions', 'event-organiser-extras' ); ?>
 							</a>

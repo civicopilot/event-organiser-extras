@@ -33,7 +33,7 @@ function eo_extras_has_paid_event_field( $event_id ) {
  * Returns register link markup for an event.
  *
  * Single events defer to the existing CiviCRM Event Organiser shortcode.
- * Recurring events are reduced to one CTA for the next active occurrence.
+ * Recurring events are reduced to one registration link for the next active occurrence.
  *
  * @param int   $event_id Event post ID.
  * @param array $args Optional arguments.
