@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @param int $event_id Event post ID.
  * @return bool
  */
-function eo_extras_has_paid_event_field( $event_id ) {
+function eox_has_paid_event_field( $event_id ) {
 	if ( ! function_exists( 'get_field_object' ) ) {
 		return false;
 	}
@@ -39,7 +39,7 @@ function eo_extras_has_paid_event_field( $event_id ) {
  * @param array $args Optional arguments.
  * @return string
  */
-function eo_extras_get_event_register_link_markup( $event_id, $args = array() ) {
+function eox_get_event_register_link_markup( $event_id, $args = array() ) {
 	$event_id = (int) $event_id;
 
 	if ( ! $event_id ) {
@@ -75,7 +75,7 @@ function eo_extras_get_event_register_link_markup( $event_id, $args = array() ) 
 		return do_shortcode( $shortcode );
 	}
 
-	if ( ! function_exists( 'get_field' ) || ! eo_extras_has_paid_event_field( $event_id ) ) {
+	if ( ! function_exists( 'get_field' ) || ! eox_has_paid_event_field( $event_id ) ) {
 		return '';
 	}
 
