@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
  */
 function eox_get_event_sidebar_template_path() {
 	$template_names = array(
-		'event-organiser-extras/event-meta-event-single-sidebar.php',
+		'event-organiser-extras/event-sidebar-meta.php',
 	);
 
 	$template = locate_template( $template_names, false, false );
@@ -25,7 +25,7 @@ function eox_get_event_sidebar_template_path() {
 		return $template;
 	}
 
-	return plugin_dir_path( dirname( __FILE__ ) ) . 'templates/event-meta-event-single-sidebar.php';
+	return plugin_dir_path( dirname( __FILE__ ) ) . 'templates/event-sidebar-meta.php';
 }
 
 /**
@@ -35,7 +35,7 @@ function eox_get_event_sidebar_template_path() {
  * @return bool
  */
 function eox_is_plugin_sidebar_template( $template_path ) {
-	return plugin_dir_path( dirname( __FILE__ ) ) . 'templates/event-meta-event-single-sidebar.php' === $template_path;
+	return plugin_dir_path( dirname( __FILE__ ) ) . 'templates/event-sidebar-meta.php' === $template_path;
 }
 
 /**

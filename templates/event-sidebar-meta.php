@@ -3,7 +3,7 @@
  * Default sidebar meta template for the [eox_sidebar_meta] shortcode.
  *
  * Child themes can override this by creating:
- * - event-organiser-extras/event-meta-event-single-sidebar.php
+ * - event-organiser-extras/event-sidebar-meta.php
  *
  * @package Event_Organiser_Extras
  */
