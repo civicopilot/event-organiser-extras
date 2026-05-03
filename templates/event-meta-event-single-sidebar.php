@@ -96,7 +96,7 @@ $google_maps_address = implode(
 					)
 				)
 			),
-			'United States',
+			$address_details['country'] ?? '',
 		)
 	)
 );
