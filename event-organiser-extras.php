@@ -38,19 +38,19 @@ define( 'EVENT_ORGANISER_EXTRAS_VERSION', '1.0.0' );
 /**
  * Load the plugin text domain for translation.
  */
-function eo_extras_load_plugin_textdomain() {
+function eox_load_plugin_textdomain() {
 	load_plugin_textdomain(
 		'event-organiser-extras',
 		false,
 		dirname( plugin_basename( __FILE__ ) ) . '/languages/'
 	);
 }
-add_action( 'plugins_loaded', 'eo_extras_load_plugin_textdomain' );
+add_action( 'plugins_loaded', 'eox_load_plugin_textdomain' );
 
 /**
  * Register front-end styles for plugin-rendered event components.
  */
-function eo_extras_register_styles() {
+function eox_register_styles() {
 	wp_register_style(
 		'event-organiser-extras',
 		plugin_dir_url( __FILE__ ) . 'assets/css/event-organiser-extras.css',
@@ -58,7 +58,7 @@ function eo_extras_register_styles() {
 		EVENT_ORGANISER_EXTRAS_VERSION
 	);
 }
-add_action( 'wp_enqueue_scripts', 'eo_extras_register_styles' );
+add_action( 'wp_enqueue_scripts', 'eox_register_styles' );
 
 /**
  * Returns the current event ID for event-related shortcodes.
@@ -68,7 +68,7 @@ add_action( 'wp_enqueue_scripts', 'eo_extras_register_styles' );
  *
  * @return int
  */
-function eo_extras_get_current_event_id() {
+function eox_get_current_event_id() {
 	$event_id = 0;
 
 	if ( is_singular( 'event' ) ) {

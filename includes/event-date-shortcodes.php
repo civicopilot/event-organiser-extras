@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @return string
  */
-function eo_extras_shortcode_timezone_abbreviation() {
+function eox_shortcode_timezone_abbreviation() {
 	$timezone_string = get_option( 'timezone_string' );
 
 	if ( empty( $timezone_string ) ) {
@@ -32,7 +32,7 @@ function eo_extras_shortcode_timezone_abbreviation() {
  * @param mixed $value Value to normalize.
  * @return bool
  */
-function eo_extras_shortcode_attribute_is_enabled( $value ) {
+function eox_shortcode_attribute_is_enabled( $value ) {
 	return 'true' === strtolower( (string) $value );
 }
 
@@ -42,7 +42,7 @@ function eo_extras_shortcode_attribute_is_enabled( $value ) {
  * @param int $event_id Event post ID.
  * @return string
  */
-function eo_extras_get_event_occurrence_text( $event_id ) {
+function eox_get_event_occurrence_text( $event_id ) {
 	$event_id = (int) $event_id;
 
 	if ( ! $event_id ) {
@@ -69,13 +69,13 @@ function eo_extras_get_event_occurrence_text( $event_id ) {
 	return esc_html( $total_events . ' ' . $day_of_week . ( $total_events > 1 ? 's' : '' ) );
 }
 
-// Create the [event_occurrence] shortcode.
-function eo_extras_event_occurrence_shortcode( $atts = array() ) {
+// Create the [eox_event_occurrence] shortcode.
+function eox_event_occurrence_shortcode( $atts = array() ) {
 	unset( $atts );
 
-	return eo_extras_get_event_occurrence_text( eo_extras_get_current_event_id() );
+	return eox_get_event_occurrence_text( eox_get_current_event_id() );
 }
-add_shortcode( 'event_occurrence', 'eo_extras_event_occurrence_shortcode' );
+add_shortcode( 'eox_event_occurrence', 'eox_event_occurrence_shortcode' );
 
 /**
  * Returns the recurrence summary such as "every month on the first Saturday".
@@ -83,7 +83,7 @@ add_shortcode( 'event_occurrence', 'eo_extras_event_occurrence_shortcode' );
  * @param int $event_id Event post ID.
  * @return string
  */
-function eo_extras_get_event_recurrence_text( $event_id ) {
+function eox_get_event_recurrence_text( $event_id ) {
 	$event_id = (int) $event_id;
 
 	if ( ! $event_id ) {
@@ -104,13 +104,13 @@ function eo_extras_get_event_recurrence_text( $event_id ) {
 	return esc_html( $summary );
 }
 
-// Create the [event_recurrence] shortcode.
-function eo_extras_event_recurrence_shortcode( $atts = array() ) {
+// Create the [eox_event_recurrence] shortcode.
+function eox_event_recurrence_shortcode( $atts = array() ) {
 	unset( $atts );
 
-	return eo_extras_get_event_recurrence_text( eo_extras_get_current_event_id() );
+	return eox_get_event_recurrence_text( eox_get_current_event_id() );
 }
-add_shortcode( 'event_recurrence', 'eo_extras_event_recurrence_shortcode' );
+add_shortcode( 'eox_event_recurrence', 'eox_event_recurrence_shortcode' );
 
 /**
  * Returns a formatted event time range for the current event context.
@@ -122,7 +122,7 @@ add_shortcode( 'event_recurrence', 'eo_extras_event_recurrence_shortcode' );
  * @param bool $timezone_enabled  Whether to append timezone abbreviation.
  * @return string
  */
-function eo_extras_get_event_time_range( $event_id, $timezone_enabled = true ) {
+function eox_get_event_time_range( $event_id, $timezone_enabled = true ) {
 	$event_id = (int) $event_id;
 
 	if ( ! $event_id ) {
@@ -153,7 +153,7 @@ function eo_extras_get_event_time_range( $event_id, $timezone_enabled = true ) {
 	}
 
 	if ( $timezone_enabled ) {
-		$timezone_abbr = eo_extras_shortcode_timezone_abbreviation();
+		$timezone_abbr = eox_shortcode_timezone_abbreviation();
 		if ( $timezone_abbr ) {
 			$time_output .= ' ' . $timezone_abbr;
 		}
@@ -171,7 +171,7 @@ function eo_extras_get_event_time_range( $event_id, $timezone_enabled = true ) {
  * @param bool $occurrence_enabled  Whether to prepend occurrence summary.
  * @return string
  */
-function eo_extras_get_event_date_text( $event_id, $time_enabled = false, $timezone_enabled = false, $occurrence_enabled = false ) {
+function eox_get_event_date_text( $event_id, $time_enabled = false, $timezone_enabled = false, $occurrence_enabled = false ) {
 	$event_id = (int) $event_id;
 
 	if ( ! $event_id ) {
@@ -182,7 +182,7 @@ function eo_extras_get_event_date_text( $event_id, $time_enabled = false, $timez
 		$output = eo_get_schedule_start( 'F j, Y', $event_id );
 
 		if ( $time_enabled ) {
-			$time_output = eo_extras_get_event_time_range( $event_id, $timezone_enabled );
+			$time_output = eox_get_event_time_range( $event_id, $timezone_enabled );
 			if ( '' !== $time_output ) {
 				$output .= ' @ ' . $time_output;
 			}
@@ -198,14 +198,14 @@ function eo_extras_get_event_date_text( $event_id, $time_enabled = false, $timez
 	$output     = $start_date . ' – ' . $end_date;
 
 	if ( $occurrence_enabled ) {
-		$occurrence = eo_extras_get_event_occurrence_text( $event_id );
+		$occurrence = eox_get_event_occurrence_text( $event_id );
 		if ( '' !== $occurrence ) {
 			$output = $occurrence . ' | ' . $output;
 		}
 	}
 
 	if ( $time_enabled ) {
-		$time_output = eo_extras_get_event_time_range( $event_id, $timezone_enabled );
+		$time_output = eox_get_event_time_range( $event_id, $timezone_enabled );
 		if ( '' !== $time_output ) {
 			$output .= ' @ ' . $time_output;
 		}
@@ -224,7 +224,7 @@ function eo_extras_get_event_date_text( $event_id, $time_enabled = false, $timez
  * @param int $event_id Event post ID.
  * @return string
  */
-function eo_extras_get_event_countdown_text( $event_id ) {
+function eox_get_event_countdown_text( $event_id ) {
 	$event_id = (int) $event_id;
 
 	if ( ! $event_id ) {
@@ -273,30 +273,30 @@ function eo_extras_get_event_countdown_text( $event_id ) {
 	);
 }
 
-// Create the [event_times] shortcode.
-function eo_extras_event_times_shortcode( $atts = array() ) {
+// Create the [eox_event_times] shortcode.
+function eox_event_times_shortcode( $atts = array() ) {
 	$atts = shortcode_atts(
 		array(
 			'timezone' => 'true',
 		),
 		$atts,
-		'event_times'
+		'eox_event_times'
 	);
 
-	$event_id = eo_extras_get_current_event_id();
+	$event_id = eox_get_current_event_id();
 
 	if ( ! $event_id ) {
 		return '';
 	}
 
-	$timezone_enabled = eo_extras_shortcode_attribute_is_enabled( $atts['timezone'] );
+	$timezone_enabled = eox_shortcode_attribute_is_enabled( $atts['timezone'] );
 
-	return eo_extras_get_event_time_range( $event_id, $timezone_enabled );
+	return eox_get_event_time_range( $event_id, $timezone_enabled );
 }
-add_shortcode( 'event_times', 'eo_extras_event_times_shortcode' );
+add_shortcode( 'eox_event_times', 'eox_event_times_shortcode' );
 
-// Create the [event_date] shortcode.
-function eo_extras_event_date_shortcode( $atts = array() ) {
+// Create the [eox_event_date] shortcode.
+function eox_event_date_shortcode( $atts = array() ) {
 	// Allow one shortcode to handle plain dates or more detailed combined output.
 	$atts = shortcode_atts(
 		array(
@@ -305,20 +305,20 @@ function eo_extras_event_date_shortcode( $atts = array() ) {
 			'occurrence' => 'false',
 		),
 		$atts,
-		'event_date'
+		'eox_event_date'
 	);
 
-	$time_enabled       = eo_extras_shortcode_attribute_is_enabled( $atts['time'] );
-	$timezone_enabled   = eo_extras_shortcode_attribute_is_enabled( $atts['timezone'] );
-	$occurrence_enabled = eo_extras_shortcode_attribute_is_enabled( $atts['occurrence'] );
-	$event_id           = eo_extras_get_current_event_id();
+	$time_enabled       = eox_shortcode_attribute_is_enabled( $atts['time'] );
+	$timezone_enabled   = eox_shortcode_attribute_is_enabled( $atts['timezone'] );
+	$occurrence_enabled = eox_shortcode_attribute_is_enabled( $atts['occurrence'] );
+	$event_id           = eox_get_current_event_id();
 
 	if ( ! $event_id ) {
 		return '';
 	}
 
-	$output = eo_extras_get_event_date_text( $event_id, $time_enabled, $timezone_enabled, $occurrence_enabled );
+	$output = eox_get_event_date_text( $event_id, $time_enabled, $timezone_enabled, $occurrence_enabled );
 
-	return '<div class="eo-event-meta ' . esc_attr( eo_recurs( $event_id ) ? 'eo-event-meta-recurring' : 'eo-event-meta-single' ) . '">' . $output . '</div>';
+	return '<div class="eox-event-meta ' . esc_attr( eo_recurs( $event_id ) ? 'eox-event-meta--recurring' : 'eox-event-meta--single' ) . '">' . $output . '</div>';
 }
-add_shortcode( 'event_date', 'eo_extras_event_date_shortcode' );
+add_shortcode( 'eox_event_date', 'eox_event_date_shortcode' );
