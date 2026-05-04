@@ -1,6 +1,6 @@
 <?php
 /**
- * Default sidebar meta template for the [eox_sidebar_meta] shortcode.
+ * Default sidebar meta template for the [eox_event_sidebar_meta] shortcode.
  *
  * Child themes can override this by creating:
  * - event-organiser-extras/event-sidebar-meta.php

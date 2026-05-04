@@ -12,7 +12,7 @@ This plugin registers the following shortcodes:
 - `[eox_event_date time="true"]` -> April 8 - May 6, 2025 @ 7:00 pm – 8:30 pm
 - `[eox_event_date time="true" timezone="true" occurrence="true"]` -> 5 Tuesdays | April 8 - May 6, 2025 @ 7:00 pm – 8:30 pm EDT
 - `[eox_event_times]` -> 7:00 pm – 8:30 pm EDT
-- `[eox_sidebar_meta]` -> event details sidebar markup with theme override support
+- `[eox_event_sidebar_meta]` -> event details sidebar markup with theme override support
 
 Supported attributes:
 
@@ -30,6 +30,6 @@ They must be used in the context of an Event Organiser event
 
 ## Event Meta Sidebar Template
 
-This plugin includes a default sidebar template for the `[eox_sidebar_meta]` shortcode. If you need custom markup, copy it into your theme at `event-organiser-extras/event-sidebar-meta.php` and customize it there.
+This plugin includes a default sidebar template for the `[eox_event_sidebar_meta]` shortcode. If you need custom markup, copy it into your theme at `event-organiser-extras/event-sidebar-meta.php` and customize it there.
 
 When the template is overridden in the theme, the plugin does not enqueue its default sidebar stylesheet. In that case, the theme is expected to provide CSS in `style.css`. You can copy the styles from `assets/css/event-organiser-extras.css` to get started.

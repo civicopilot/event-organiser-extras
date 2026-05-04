@@ -39,7 +39,7 @@ function eox_is_plugin_sidebar_template( $template_path ) {
 }
 
 /**
- * Create the [eox_sidebar_meta] shortcode.
+ * Create the [eox_event_sidebar_meta] shortcode.
  *
  * Loads a default sidebar meta template from the plugin, but allows a child
  * theme override so client-specific sidebar presentation can live in the theme.
@@ -90,4 +90,4 @@ function eox_event_sidebar_meta_shortcode( $atts = array() ) {
 
 	return $output;
 }
-add_shortcode( 'eox_sidebar_meta', 'eox_event_sidebar_meta_shortcode' );
+add_shortcode( 'eox_event_sidebar_meta', 'eox_event_sidebar_meta_shortcode' );
