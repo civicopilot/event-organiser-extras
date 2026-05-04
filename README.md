@@ -7,7 +7,7 @@ WordPress shortcodes for the Event Organiser plugin, intended for reusable event
 This plugin registers the following shortcodes:
 
 - `[eox_event_occurrence]` -> 5 Tuesdays
-- `[eox_event_recurrence]` -> every month on the second Thursday`
+- `[eox_event_recurrence]` -> every month on the second Thursday
 - `[eox_event_date]` -> April 8 - May 6, 2025
 - `[eox_event_date time="true"]` -> April 8 - May 6, 2025 @ 7:00 pm – 8:30 pm
 - `[eox_event_date time="true" timezone="true" occurrence="true"]` -> 5 Tuesdays | April 8 - May 6, 2025 @ 7:00 pm – 8:30 pm EDT
