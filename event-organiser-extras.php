@@ -92,5 +92,10 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/event-register-links.php';
 // Date/time/occurrence shortcodes and related event helpers.
 require_once plugin_dir_path( __FILE__ ) . 'includes/event-date-shortcodes.php';
 
+// Admin menu addition for Event Organiser.
+if ( is_admin() ) {
+require_once plugin_dir_path( __FILE__ ) . 'includes/event-admin-menu.php';
+}
+
 // Sidebar meta shortcode and theme-override template loading.
 require_once plugin_dir_path( __FILE__ ) . 'includes/event-sidebar-shortcode.php';

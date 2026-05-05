@@ -22,6 +22,10 @@ Supported attributes:
 
 They must be used in the context of an Event Organiser event
 
+## Admin Menu
+
+Adds a **Future Events** submenu item under the Events admin menu. It links to the existing Event Organiser events list filtered with `eo_interval=future` parameter.
+
 ## Requirements
 
 - WordPress
