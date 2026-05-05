@@ -14,7 +14,7 @@
  * @wordpress-plugin
  * Plugin Name:       Event Organiser Extras
  * Plugin URI:        https://github.com/civicopilot/event-organiser-extras
- * Description:       Reusable extras and shortcodes for WPCV Event Organiser.
+ * Description:       Extends WPCV Event Organiser with shortcodes, meta sidebar with registration link logic
  * Version:           1.0.0
  * Requires Plugins:  wpcv-event-organiser
  * Author:            Andy Burns
