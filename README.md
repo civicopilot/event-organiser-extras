@@ -1,8 +1,10 @@
 # Event Organiser Extras
 
-WordPress shortcodes for the Event Organiser plugin, intended for reusable event displays in query builders and to lesser extent PHP templates if you must.
+Extends the Event Organiser plugin with event display shortcodes, an out-of-the-box event meta sidebar with registration link logic, and a future events admin menu link.
 
-## Shortcodes
+## Features
+
+### Shortcodes
 
 This plugin registers the following shortcodes:
 
@@ -20,20 +22,20 @@ Supported attributes:
 - `[eox_event_times]` supports `timezone`
 - These are boolean shortcode attributes passed as string values, for example `time="true"` or `timezone="false"`
 
-They must be used in the context of an Event Organiser event
+They must be used in the context of an Event Organiser event.
 
-## Admin Menu
+### Admin Menu
 
 Adds a **Future Events** submenu item under the Events admin menu. It links to the existing Event Organiser events list filtered with `eo_interval=future` parameter.
+
+### Event Sidebar
+
+The `[eox_event_sidebar_meta]` shortcode provides an out-of-the-box event sidebar for single event pages. It includes default markup and styles for common event details, plus registration link logic for single and recurring events. If you need custom markup, copy the default template into your theme at `event-organiser-extras/event-sidebar-meta.php` and customize it there.
+
+When the template is overridden in the theme, the plugin does not enqueue its default sidebar stylesheet. In that case, the theme is expected to provide CSS in `style.css`. You can copy the styles from `assets/css/event-organiser-extras.css` to get started.
 
 ## Requirements
 
 - WordPress
 - [WPCV Event Organiser](https://develop.tadpole.cc/plugins/wpcv-event-organiser)
 - [CiviCRM Event Organiser](https://github.com/christianwach/civicrm-event-organiser) integration for registration link output
-
-## Event Meta Sidebar Template
-
-This plugin includes a default sidebar template for the `[eox_event_sidebar_meta]` shortcode. If you need custom markup, copy it into your theme at `event-organiser-extras/event-sidebar-meta.php` and customize it there.
-
-When the template is overridden in the theme, the plugin does not enqueue its default sidebar stylesheet. In that case, the theme is expected to provide CSS in `style.css`. You can copy the styles from `assets/css/event-organiser-extras.css` to get started.
