@@ -24,18 +24,38 @@ Supported attributes:
 
 They must be used in the context of an Event Organiser event.
 
-### Admin Menu
-
-Adds a **Future Events** submenu item under the Events admin menu. It links to the existing Event Organiser events list filtered with `eo_interval=future` parameter.
-
 ### Event Sidebar
 
 The `[eox_event_sidebar_meta]` shortcode provides an out-of-the-box event sidebar for single event pages. It includes default markup and styles for common event details, plus registration link logic for single and recurring events. If you need custom markup, copy the default template into your theme at `event-organiser-extras/event-sidebar-meta.php` and customize it there.
 
+The sidebar uses CiviCRM Event Organiser for registration links. For recurring events, EOX limits the active occurrence links before display. By default it shows the next active registration link.
+
+#### Recurring link display modes
+
+- `next` shows the next active registration link. (default)
+- `all` shows all active recurring registration links.
+- `limit` shows a fixed number of active recurring registration links. Use `eox/register_links/recurring/limit` to set the number.
+
+Example:
+
+```php
+add_filter( 'eox/register_links/recurring/display_mode', function() {
+	return 'limit';
+} );
+
+add_filter( 'eox/register_links/recurring/limit', function() {
+	return 3;
+} );
+```
+#### Styling
 When the template is overridden in the theme, the plugin does not enqueue its default sidebar stylesheet. In that case, the theme is expected to provide CSS in `style.css`. You can copy the styles from `assets/css/event-organiser-extras.css` to get started.
+
+### Admin Menu
+
+Adds a **Future Events** submenu item under the Events admin menu. It links to the existing Event Organiser events list filtered with `eo_interval=future` parameter.
 
 ## Requirements
 
 - WordPress
 - [WPCV Event Organiser](https://develop.tadpole.cc/plugins/wpcv-event-organiser)
-- [CiviCRM Event Organiser](https://github.com/christianwach/civicrm-event-organiser) integration for registration link output
+- [CiviCRM Event Organiser](https://github.com/christianwach/civicrm-event-organiser) required if you need registration running through CiviCRM

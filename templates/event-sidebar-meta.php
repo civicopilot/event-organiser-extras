@@ -149,7 +149,15 @@ $google_maps_url = $google_maps_address
 
 	<div class="eox-register-link">
 		<?php
-		echo wp_kses_post( eox_get_event_register_link_markup( $event_id ) );
+		if ( $is_recurring ) {
+			$register_link = eox_get_recurring_register_links_markup( $event_id );
+		} else {
+			$register_link = do_shortcode( '[ceo_register_link]' );
+		}
+
+		if ( ! empty( $register_link ) ) {
+			echo wp_kses_post( $register_link );
+		}
 		?>
 	</div>
 </aside>
