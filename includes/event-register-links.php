@@ -18,7 +18,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @param int $event_id Event post ID.
  * @return string
  */
-function eox_get_limited_recurring_register_links_markup( $event_id ) {
+function eox_get_recurring_register_links_markup( $event_id ) {
 	$event_id = (int) $event_id;
 
 	if ( ! $event_id || ! eo_recurs( $event_id ) ) {
