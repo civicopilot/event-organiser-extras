@@ -14,6 +14,7 @@ This plugin registers the following shortcodes:
 - `[eox_event_date time="true"]` -> April 8 - May 6, 2025 @ 7:00 pm – 8:30 pm
 - `[eox_event_date time="true" timezone="true" occurrence="true"]` -> 5 Tuesdays | April 8 - May 6, 2025 @ 7:00 pm – 8:30 pm EDT
 - `[eox_event_times]` -> 7:00 pm – 8:30 pm EDT
+- `[eox_event_format]` -> In-person or Virtual
 - `[eox_event_sidebar_meta]` -> event details sidebar markup with theme override support
 
 Supported attributes:
