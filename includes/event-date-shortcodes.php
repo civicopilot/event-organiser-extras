@@ -39,8 +39,7 @@ function eox_shortcode_attribute_is_enabled( $value ) {
 /**
  * Returns whether an event is in-person or virtual based on venue address data.
  *
- * Events with venue address details are treated as in-person. Events with no
- * venue address details, such as a Zoom-only venue name, are treated as virtual.
+ * Events with a city listed for their venue are treated as in person. Those without a city, such as a venue named "Live via Zoom," are treated as virtual.
  *
  * @param int|null $event_id Event post ID. Defaults to the current event context.
  * @return string
@@ -52,10 +51,12 @@ function eox_get_event_format_label( $event_id = null ) {
 		return '';
 	}
 
-	$venue_id        = eo_get_venue( $event_id );
-	$address_details = $venue_id ? array_filter( eo_get_venue_address( $venue_id ) ) : array();
+	$venue_id = eo_get_venue( $event_id );
+	$address  = $venue_id ? eo_get_venue_address( $venue_id ) : array();
 
-	return $address_details ? esc_html__( 'In-person', 'event-organiser-extras' ) : esc_html__( 'Virtual', 'event-organiser-extras' );
+	$in_person = ! empty( $address['city'] );
+
+	return $in_person ? esc_html__( 'In person', 'event-organiser-extras' ) : esc_html__( 'Virtual', 'event-organiser-extras' );
 }
 
 // Create the [eox_event_format] shortcode.
