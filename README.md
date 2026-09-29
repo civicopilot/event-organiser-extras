@@ -29,6 +29,8 @@ They must be used in the context of an Event Organiser event.
 
 The `[eox_event_sidebar_meta]` shortcode provides an out-of-the-box event sidebar for single event pages. It includes default markup and styles for common event details, plus registration link logic for single and recurring events. If you need custom markup, copy the default template into your theme at `event-organiser-extras/event-sidebar-meta.php` and customize it there.
 
+Plugins can supply a fallback template through `eox_event_sidebar_template_path`, which receives and returns an absolute template path. This filter runs only when neither the child nor parent theme provides `event-organiser-extras/event-sidebar-meta.php`. EOX enqueues its default sidebar stylesheet only when its own default template is selected.
+
 The sidebar uses CiviCRM Event Organiser for registration links. For recurring events, EOX limits the active occurrence links before display. By default it shows the next active registration link.
 
 #### Recurring link display modes
