@@ -25,7 +25,15 @@ function eox_get_event_sidebar_template_path() {
 		return $template;
 	}
 
-	return plugin_dir_path( dirname( __FILE__ ) ) . 'templates/event-sidebar-meta.php';
+	/**
+	 * Filters the fallback sidebar template after checking theme overrides.
+	 *
+	 * @param string $template_path Absolute path to the fallback template.
+	 */
+	return apply_filters(
+		'eox_event_sidebar_template_path',
+		plugin_dir_path( dirname( __FILE__ ) ) . 'templates/event-sidebar-meta.php'
+	);
 }
 
 /**
