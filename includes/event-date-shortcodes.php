@@ -246,11 +246,12 @@ function eox_get_event_date_text( $event_id, $time_enabled = false, $timezone_en
 }
 
 /**
- * Returns a short "coming up" message for the event.
+ * Returns a short countdown or an event in progress message.
  *
  * For recurring events this uses the next occurrence. For non-recurring events
- * it uses the scheduled start date. Past or already-started events return an
- * empty string because "coming up" would no longer be accurate.
+ * it uses the scheduled start date and shows a happening-now message while
+ * Event Organiser reports an active occurrence. Finished non-recurring events
+ * and starts more than 60 calendar days away return an empty string.
  *
  * @param int $event_id Event post ID.
  * @return string
@@ -263,44 +264,62 @@ function eox_get_event_countdown_text( $event_id ) {
 	}
 
 	if ( eo_recurs( $event_id ) ) {
+		// Recurring countdowns refer to the next start, not an occurrence already underway.
 		$next_occurrence = eo_get_next_occurrence_of( $event_id );
 
 		if ( empty( $next_occurrence['start'] ) || ! ( $next_occurrence['start'] instanceof DateTime ) ) {
 			return '';
 		}
 
-		$target = clone $next_occurrence['start'];
+		// Copy the start time so the original stays unchanged.
+		$event_start = clone $next_occurrence['start'];
 	} else {
-		$schedule = eo_get_event_schedule( $event_id );
-		if ( empty( $schedule['start'] ) || ! ( $schedule['start'] instanceof DateTime ) ) {
+		// Get the single event's scheduled dates.
+		$event_schedule = eo_get_event_schedule( $event_id );
+		if ( empty( $event_schedule['start'] ) || ! ( $event_schedule['start'] instanceof DateTime ) ) {
 			return '';
 		}
 
-		$target = clone $schedule['start'];
+		// Event Organiser checks the stored start and end for both timed and all-day events.
+		if ( eo_get_current_occurrence_of( $event_id ) ) {
+			return esc_html__( 'Event is happening now', 'event-organiser-extras' );
+		}
+
+		// Keep the schedule's original datetime intact when calculating calendar days.
+		$event_start = clone $event_schedule['start'];
 	}
 
-	$today = new DateTime( 'now', eo_get_blog_timezone() );
-	$today->setTime( 0, 0, 0 );
-	$target->setTime( 0, 0, 0 );
+	$current_datetime = new DateTime( 'now', eo_get_blog_timezone() );
 
-	$day_diff = (int) $today->diff( $target )->format( '%r%a' );
-
-	if ( $day_diff < 0 ) {
+	// Hide the countdown once the event has started.
+	// Check the actual time before discarding it for the calendar-day comparison.
+	if ( $event_start <= $current_datetime ) {
 		return '';
 	}
 
-	if ( 0 === $day_diff ) {
+	// Count calendar days, so tomorrow is one day away even when less than 24 hours away.
+	$current_datetime->setTime( 0, 0, 0 );
+	$event_start->setTime( 0, 0, 0 );
+
+	$days_until_event = (int) $current_datetime->diff( $event_start )->format( '%r%a' );
+
+	// Do not show countdown for far off events (60 days or more out)
+	if ( $days_until_event > 60 ) {
+		return '';
+	}
+
+	if ( 0 === $days_until_event ) {
 		return esc_html__( 'Coming up today', 'event-organiser-extras' );
 	}
 
-	if ( 1 === $day_diff ) {
+	if ( 1 === $days_until_event ) {
 		return esc_html__( 'Coming up tomorrow', 'event-organiser-extras' );
 	}
 
 	return sprintf(
 		/* translators: %d: number of days until the event. */
 		esc_html__( 'Coming up in %d days', 'event-organiser-extras' ),
-		$day_diff
+		$days_until_event
 	);
 }
 
