@@ -53,6 +53,10 @@ add_filter( 'eox/register_links/recurring/limit', function() {
 #### Styling
 When the template is overridden in the theme, the plugin does not enqueue its default sidebar stylesheet. In that case, the theme is expected to provide CSS in `style.css`. You can copy the styles from `assets/css/event-organiser-extras.css` to get started.
 
+### Venue directions helper
+
+`eox_get_venue_google_directions_url( $venue_id )` generates a Google Maps directions link from an Event Organiser venue's address for reuse across templates.
+
 ### Admin Menu
 
 Adds a **Future Events** submenu item under the Events admin menu. It links to the existing Event Organiser events list filtered with `eo_interval=future` parameter.
