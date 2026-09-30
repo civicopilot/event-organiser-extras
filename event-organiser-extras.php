@@ -86,13 +86,16 @@ function eox_get_current_event_id() {
 	return $event_id;
 }
 
+// Venue helpers shared by templates and other callers.
+require_once plugin_dir_path( __FILE__ ) . 'includes/event-venue-helpers.php';
+
 // Event registration link helpers for single and recurring events.
 require_once plugin_dir_path( __FILE__ ) . 'includes/event-register-links.php';
 
 // Date/time/occurrence shortcodes and related event helpers.
 require_once plugin_dir_path( __FILE__ ) . 'includes/event-date-shortcodes.php';
 
-// Admin menu addition for Event Organiser.
+// Future events admin menu addition.
 if ( is_admin() ) {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/event-admin-menu.php';
 }

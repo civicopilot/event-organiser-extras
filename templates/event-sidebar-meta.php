@@ -79,31 +79,7 @@ if ( '' !== $city_state_postcode ) {
 	$location_parts[] = $city_state_postcode;
 }
 
-$google_maps_address = implode(
-	', ',
-	array_filter(
-		array(
-			$address_details['address'] ?? '',
-			$address_details['city'] ?? '',
-			trim(
-				implode(
-					' ',
-					array_filter(
-						array(
-							$address_details['state'] ?? '',
-							$address_details['postcode'] ?? '',
-						)
-					)
-				)
-			),
-			$address_details['country'] ?? '',
-		)
-	)
-);
-
-$google_maps_url = $google_maps_address
-	? 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode( $google_maps_address )
-	: '';
+$google_maps_url = eox_get_venue_google_directions_url( $venue_id );
 ?>
 
 <aside class="eox-event-meta eox-sidebar-meta">
